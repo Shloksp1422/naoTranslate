@@ -1,8 +1,8 @@
 "use client";
 import "./global.css"; 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-// ✅ Extend `Window` interface to define `SpeechRecognition`
+// ✅ Define `SpeechRecognition` correctly
 declare global {
   interface Window {
     SpeechRecognition: typeof SpeechRecognition;
@@ -10,19 +10,10 @@ declare global {
   }
 }
 
-// ✅ Define SpeechRecognitionEvent interface
-// interface SpeechRecognitionResult {
-//   transcript: string;
-//   confidence: number;
-// }
-
-// interface CustomSpeechRecognitionEvent extends Event {
-//   results: {
-//     length: number;
-//     isFinal: boolean;
-//     [index: number]: SpeechRecognitionResult[];
-//   };
-// }
+// ✅ Define Custom SpeechRecognition Event
+interface CustomSpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
 
 // ✅ Define API response type
 interface TranslationResponse {
@@ -49,8 +40,9 @@ const TranslationPage: React.FC = () => {
     setInputLangError("");
     setIsListening(true);
 
-    // ✅ Correctly accessing `SpeechRecognition` from the window object
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      typeof window !== "undefined" &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition);
 
     if (!SpeechRecognition) {
       console.error("Speech recognition is not supported in this browser.");
@@ -62,7 +54,8 @@ const TranslationPage: React.FC = () => {
     recognition.continuous = false;
     recognition.interimResults = false;
 
-    recognition.onresult = (event: SpeechRecognitionEvent): void => {
+    // ✅ Fix TypeScript issue in event handler
+    recognition.onresult = (event: CustomSpeechRecognitionEvent): void => {
       if (event.results.length > 0) {
         const transcript: string = event.results[0][0].transcript;
         setInputText(transcript);
@@ -77,8 +70,8 @@ const TranslationPage: React.FC = () => {
     recognition.start();
   };
 
-  // ✅ Function to translate text using API (with useCallback fix)
-  const translateText = useCallback(async (text: string): Promise<void> => {
+  // ✅ Function to translate text using API
+  const translateText = async (text: string): Promise<void> => {
     if (!outputLang) {
       setOutputLangError("Please select a translation language.");
       return;
@@ -100,24 +93,24 @@ const TranslationPage: React.FC = () => {
       }
 
       setTranslatedText(data.translation);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Translation failed:", error.message);
       } else {
         console.error("Translation failed:", error);
       }
     }
-  }, [inputLang, outputLang]); // ✅ Added dependencies
+  };
 
-  // ✅ Auto-translate when outputLang is changed
+  // ✅ Auto-translate when outputLang is changed (Fixed `useEffect` warning)
   useEffect(() => {
     if (delayedText && outputLang) {
       translateText(delayedText);
     }
-  }, [delayedText, outputLang, translateText]); // ✅ Now includes translateText
+  }, [delayedText, outputLang]); // ✅ Added dependencies
 
   // ✅ Function to swap languages
-  const swapLanguages = (): void => {
+  const swapLanguages = () => {
     setInputLang(outputLang);
     setOutputLang(inputLang);
     setInputText(translatedText);
@@ -171,7 +164,7 @@ const TranslationPage: React.FC = () => {
           <button
             className={`circle-button ${isListening ? "listening" : "speak"}`}
             onClick={startListening}
-            disabled={!inputLang}
+            disabled={!inputLang}  // ✅ Disabled before selecting language
           >
             🎤
           </button>
@@ -210,7 +203,7 @@ const TranslationPage: React.FC = () => {
           <button 
             className="circle-button translate" 
             onClick={playTranslatedAudio} 
-            disabled={!outputLang}
+            disabled={!outputLang}  // ✅ Disabled before selecting language
           >
             🔊
           </button>
