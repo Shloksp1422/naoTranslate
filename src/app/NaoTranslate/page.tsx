@@ -108,7 +108,7 @@ const TranslationPage: React.FC = () => {
     if (delayedText && outputLang) {
       translateText(delayedText);
     }
-  }, [delayedText, outputLang]); // ✅ Added dependencies
+  }, [delayedText, outputLang, translateText]);  // ✅ Added dependencies
 
   // ✅ Function to swap languages
   const swapLanguages = () => {

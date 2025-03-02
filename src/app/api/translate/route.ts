@@ -1,4 +1,3 @@
-import { Console } from "console";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -9,12 +8,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
-    //   return NextResponse.json({ error: "API key is missing" }, { status: 401 });
-    // }
+    if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
+      return NextResponse.json({ error: "API key is missing" }, { status: 401 });
+    }
 
     const response = await fetch(
-      `https://translation.googleapis.com/language/translate/v2?key=AIzaSyCNUvmznkOXWqe6D5KIMrHKesL4k_sssiA`,
+      `https://translation.googleapis.com/language/translate/v2?key=${process.env.GOOGLE_TRANSLATE_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
