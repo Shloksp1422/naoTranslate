@@ -1,3 +1,4 @@
+import { Console } from "console";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const response = await fetch(
-      `https://translation.googleapis.com/language/translate/v2?key=${process.env.GOOGLE_TRANSLATE_API_KEY}`,
+      `https://translation.googleapis.com/language/translate/v2?key=AIzaSyCNUvmznkOXWqe6D5KIMrHKesL4k_sssiA`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
