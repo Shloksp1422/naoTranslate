@@ -20,6 +20,7 @@ interface TranslationResponse {
   translation: string;
   error?: string;
 }
+//hello
 
 const TranslationPage: React.FC = () => {
   const [inputText, setInputText] = useState<string>("");
