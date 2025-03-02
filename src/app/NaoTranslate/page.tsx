@@ -16,13 +16,13 @@ interface SpeechRecognitionResult {
   confidence: number;
 }
 
-interface CustomSpeechRecognitionEvent extends Event {
-  results: {
-    length: number;
-    isFinal: boolean;
-    [index: number]: SpeechRecognitionResult[];
-  };
-}
+// interface CustomSpeechRecognitionEvent extends Event {
+//   results: {
+//     length: number;
+//     isFinal: boolean;
+//     [index: number]: SpeechRecognitionResult[];
+//   };
+// }
 
 // ✅ Define API response type
 interface TranslationResponse {
