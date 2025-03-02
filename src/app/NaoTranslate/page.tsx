@@ -11,10 +11,10 @@ declare global {
 }
 
 // ✅ Define SpeechRecognitionEvent interface
-interface SpeechRecognitionResult {
-  transcript: string;
-  confidence: number;
-}
+// interface SpeechRecognitionResult {
+//   transcript: string;
+//   confidence: number;
+// }
 
 // interface CustomSpeechRecognitionEvent extends Event {
 //   results: {
