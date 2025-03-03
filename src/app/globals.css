@@ -2,177 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === General Styling === */
-body {
-  background-color: #f9fafb;
-  font-family: 'Inter', sans-serif;
-}
-
-/* === Main Container === */
-.container {
+.home-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 1.5rem;
-}
-
-/* === Translation Box Layout === */
-.translation-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; /* Space between input and output */
-  width: 100%;
-  max-width: 42rem;
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* === Columns for Text and Buttons === */
-.column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-/* === Dropdown Select Styling === */
-.select-box {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  outline: none;
-  transition: all 0.2s;
-  margin-bottom: 0.5rem;
-}
-
-.select-box:focus {
-  border-color: #3b82f6;
-  box-shadow: 0px 0px 4px rgba(59, 130, 246, 0.5);
-}
-
-/* === Error Messages === */
-.error-message {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  text-align: left;
-  width: 100%;
-}
-
-/* === Text Area Styling === */
-textarea {
-  width: 100%;
-  height: 6rem;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: #f9fafb;
-  outline: none;
-  transition: all 0.2s;
-  resize: none;
-  margin-top: 0.75rem;
-}
-
-textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0px 0px 4px rgba(59, 130, 246, 0.5);
-}
-
-/* === Speak and Play Buttons Styling (Side by Side) === */
-.button-container {
-  display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 2rem; /* Space between buttons */
-  margin-top: 1rem;
-}
-
-/* === Circle Button Styling === */
-.circle-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: white;
-  border: none;
-  outline: none;
-  transition: transform 0.2s ease-in-out;
+  height: 100vh;
   text-align: center;
-  padding: 10px;
+  background-color: #f4f4f4;
+  padding: 2rem;
 }
 
-/* === Button Colors === */
-.speak {
-  background-color: #2563eb; /* Blue */
+/* Heading Styling */
+h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 1rem;
 }
 
-.play {
-  background-color: #16a34a; /* Green */
+/* Paragraph Styling */
+p {
+  font-size: 1.2rem;
+  color: #555;
 }
 
-/* === Hover Effect === */
-.circle-button:hover {
-  transform: scale(1.1);
-}
-
-/* === Disabled Button State === */
-.circle-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* === Fix Button Text Alignment === */
-.circle-button span {
-  display: block;
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-/* === Swap Button Styling === */
-.swap-button {
-  background-color: #f59e0b;
-  color: white;
+/* LinkedIn Link Styling */
+.linkedin-link {
+  color: #0077b5;
   font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+.linkedin-link:hover {
+  color: #005582;
+}
+
+/* Button Styling */
+.translate-button {
+  margin-top: 2rem;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  background-color: #2563eb;
   border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
+  transition: background 0.3s ease-in-out;
 }
 
-.swap-button:hover {
-  background-color: #d97706;
+.translate-button:hover {
+  background-color: #1e40af;
 }
 
-/* === Error Border for Select Boxes === */
-.error-border {
-  border: 2px solid red !important;
+/* === Footer Styling === */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  color: #333;
+  font-size: 1rem;
 }
 
-/* === Responsive Design (Ensuring Proper Spacing on Mobile) === */
-@media (max-width: 600px) {
-  .translation-container {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .button-container {
-    flex-direction: row;
-    gap: 1rem;
-  }
-
-  .circle-button {
-    width: 70px;
-    height: 70px;
-    font-size: 0.8rem;
-  }
+.linkedin-link {
+  color: #0077b5;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
 }
+
+.linkedin-link:hover {
+  color: #005582;
+}
+

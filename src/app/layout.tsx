@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Nao Translate",
-  description: "Crated by Shlok Patel",
+  description: "Created by Shlok Patel",
 };
 
 export default function RootLayout({
@@ -28,6 +28,21 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+
+        {/* ✅ Global Footer Added Here */}
+        <footer className="footer">
+          <p>Created by <strong>Shlok Jayesh Patel</strong></p>
+          <p>
+            <a
+              href="https://www.linkedin.com/in/shlokpatel140202/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="linkedin-link"
+            >
+              Connect on LinkedIn
+            </a>
+          </p>
+        </footer>
       </body>
     </html>
   );
