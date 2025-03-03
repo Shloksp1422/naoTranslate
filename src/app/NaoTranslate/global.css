@@ -199,4 +199,10 @@ textarea:focus {
     height: 70px;
     font-size: 0.8rem;
   }
+  .error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+    
 }

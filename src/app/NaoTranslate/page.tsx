@@ -1,6 +1,6 @@
 "use client";
 import "../NaoTranslate/global.css"; 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // ✅ Define `SpeechRecognition` correctly
 declare global {
@@ -8,11 +8,6 @@ declare global {
     SpeechRecognition: typeof SpeechRecognition;
     webkitSpeechRecognition: typeof SpeechRecognition;
   }
-}
-
-// ✅ Define Custom SpeechRecognition Event
-interface CustomSpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
 }
 
 // ✅ Define API response type
@@ -31,32 +26,27 @@ const TranslationPage: React.FC = () => {
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const [inputLangError, setInputLangError] = useState<string>("");
   const [outputLangError, setOutputLangError] = useState<string>("");
-  const [highlightError, setHighlightError] = useState<boolean>(false);
 
-  // ✅ Function to start or stop speech recognition (Toggle on button click)
+  // ✅ Function to start or stop speech recognition
   const toggleListening = (): void => {
+    if (!inputLang) {
+      setInputLangError("Please select an input language.");
+      return;
+    }
+    if (!outputLang) {
+      setOutputLangError("Please select a translation language.");
+      return;
+    }
+
     if (isListening) {
       stopListening();
       return;
     }
 
-    if (!inputLang) {
-      setInputLangError("Please select an input language.");
-      setHighlightError(true);
-      return;
-    }
-    if (!outputLang) {
-      setOutputLangError("Please select a translation language.");
-      setHighlightError(true);
-      return;
-    }
-
     stopSpeaking(); // ✅ Stop speaker if mic is clicked
-
+    setIsListening(true);
     setInputLangError("");
     setOutputLangError("");
-    setHighlightError(false);
-    setIsListening(true);
 
     const SpeechRecognition =
       typeof window !== "undefined" &&
@@ -72,7 +62,7 @@ const TranslationPage: React.FC = () => {
     recog.continuous = true;
     recog.interimResults = true;
 
-    recog.onresult = (event: CustomSpeechRecognitionEvent): void => {
+    recog.onresult = (event: SpeechRecognitionEvent): void => {
       let transcript = "";
       for (let i = 0; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript + " ";
@@ -88,7 +78,7 @@ const TranslationPage: React.FC = () => {
     recog.start();
   };
 
-  // ✅ Function to stop speech recognition manually
+  // ✅ Function to stop speech recognition
   const stopListening = () => {
     if (recognition) {
       recognition.stop();
@@ -96,11 +86,9 @@ const TranslationPage: React.FC = () => {
     }
   };
 
-  // ✅ Function to translate text using API (Fixed Issue with Real-time Updates)
-  const translateText = async (text: string, targetLang?: string): Promise<void> => {
-    const newOutputLang = targetLang || outputLang;
-    
-    if (!newOutputLang) {
+  // ✅ Function to translate text using API
+  const translateText = async (text: string): Promise<void> => {
+    if (!outputLang) {
       setOutputLangError("Please select a translation language.");
       return;
     }
@@ -110,98 +98,59 @@ const TranslationPage: React.FC = () => {
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, inputLang, outputLang: newOutputLang }), // ✅ Always use the latest selected language
+        body: JSON.stringify({ text, inputLang, outputLang }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("API Error Response:", errorData);
-        throw new Error(`Translation API request failed: ${errorData.error || "Unknown error"}`);
+        console.error("API Error:", await response.json());
+        return;
       }
 
       const data: TranslationResponse = await response.json();
       setTranslatedText(data.translation);
-    } catch (error: unknown) {
-      console.error("Translation failed:", error instanceof Error ? error.message : error);
+    } catch (error) {
+      console.error("Translation failed:", error);
     }
   };
 
-  // ✅ Function to swap languages
+  // ✅ Function to swap input and output languages
+  const swapLanguages = () => {
+    if (!inputLang || !outputLang) return;
 
+    setInputLang(outputLang);
+    setOutputLang(inputLang);
+    setInputText(translatedText);
+    setTranslatedText(inputText);
+  };
 
-  // ✅ Function to play/stop translated text as speech
-  // ✅ Function to play/stop translated text as speech
-const toggleSpeaking = (): void => {
-  if (isSpeaking) {
-    stopSpeaking();
-    return;
-  }
+  // ✅ Function to play translated text as speech
+  const toggleSpeaking = (): void => {
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
 
-  if (!translatedText) return;
-  stopListening(); // ✅ Stop mic if speaker is clicked
+    if (!translatedText) return;
+    stopListening(); // ✅ Stop mic if speaker is clicked
 
-  const synth = window.speechSynthesis;
-  let utterance = new SpeechSynthesisUtterance(translatedText);
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(translatedText);
+    utterance.lang = outputLang;
 
-  // ✅ Set language properly
-  utterance.lang = outputLang;
+    // ✅ Ensure voice compatibility
+    const availableVoices = synth.getVoices();
+    const voiceForLang = availableVoices.find(voice => voice.lang.startsWith(outputLang));
+    if (voiceForLang) utterance.voice = voiceForLang;
 
-  // ✅ Fallback for unsupported languages
-  const availableVoices = synth.getVoices();
-  const voiceForLang = availableVoices.find(voice => voice.lang.startsWith(outputLang));
-
-  if (!voiceForLang) {
-    console.warn(`No voice found for ${outputLang}, using default English voice.`);
-    utterance.lang = "en-US"; // ✅ Default to English if unsupported
-  } else {
-    utterance.voice = voiceForLang;
-  }
-
-  setIsSpeaking(true);
-  synth.speak(utterance);
-
-  utterance.onend = () => setIsSpeaking(false);
-};
+    setIsSpeaking(true);
+    synth.speak(utterance);
+    utterance.onend = () => setIsSpeaking(false);
+  };
 
   // ✅ Function to stop translation speaker
   const stopSpeaking = () => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
-  };
-  // ✅ Function to swap input and output languages
-const swapLanguages = () => {
-  if (!inputLang || !outputLang) return; // Ensure both languages are selected before swapping
-
-  setInputLang(outputLang);
-  setOutputLang(inputLang);
-  setInputText(translatedText); // Swap text fields as well
-  setTranslatedText(inputText);
-};
-
-
-  // ✅ Function to clear text when input language changes
-  const handleInputLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setInputLang(e.target.value);
-    setInputText(""); // ✅ Clears text
-  };
-
-  // ✅ Function to handle output language changes & update translation immediately
-  const handleOutputLangChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOutputLang = e.target.value;
-
-    if (newOutputLang === inputLang) {
-      setOutputLangError("Input and output languages cannot be the same.");
-      return;
-    }
-
-    setOutputLangError("");
-    setOutputLang(newOutputLang);
-
-    // ✅ Immediately update translation if text exists
-    if (inputText.trim()) {
-      setTranslatedText(""); // Clear previous translation before updating
-      await translateText(inputText, newOutputLang);
-    }
   };
 
   return (
@@ -211,8 +160,8 @@ const swapLanguages = () => {
       <div className="translation-container">
         {/* Left Column - Input */}
         <div className="column">
-          <h2 className={highlightError ? "error-text" : ""}>Original Language <span className="required">*</span></h2>
-          <select required value={inputLang} onChange={handleInputLangChange} className="select-box">
+          <h2>Original Language <span className="required">*</span></h2>
+          <select value={inputLang} onChange={(e) => setInputLang(e.target.value)} className="select-box">
             <option value="">Select Language</option>
             <option value="en">English</option>
             <option value="zh-CN">Chinese</option>
@@ -224,8 +173,15 @@ const swapLanguages = () => {
             <option value="hi">Hindi</option>
             <option value="fr">French</option>
           </select>
+          {inputLangError && <p className="error-message">{inputLangError}</p>}
 
-          <textarea placeholder="Type or speak here..." value={inputText} onChange={(e) => setInputText(e.target.value)} />
+          <textarea 
+            placeholder="Type or speak here..." 
+            value={inputText} 
+            onChange={(e) => setInputText(e.target.value)}
+            disabled={!inputLang || !outputLang} // ✅ Disable if no language selected
+            className={!inputLang || !outputLang ? "disabled-textarea" : ""}
+          />
 
           <button className={`circle-button ${isListening ? "listening" : "speak"}`} onClick={toggleListening}>
             {isListening ? "⏹ Stop" : "🎤 Start"}
@@ -234,8 +190,8 @@ const swapLanguages = () => {
 
         {/* Right Column - Output */}
         <div className="column">
-          <h2 className={highlightError ? "error-text" : ""}>Translated Language <span className="required">*</span></h2>
-          <select required value={outputLang} onChange={handleOutputLangChange} className="select-box">
+          <h2>Translated Language <span className="required">*</span></h2>
+          <select value={outputLang} onChange={(e) => setOutputLang(e.target.value)} className="select-box">
             <option value="">Select Language</option>
             <option value="en">English</option>
             <option value="zh-CN">Chinese</option>
@@ -247,6 +203,7 @@ const swapLanguages = () => {
             <option value="hi">Hindi</option>
             <option value="fr">French</option>
           </select>
+          {outputLangError && <p className="error-message">{outputLangError}</p>}
 
           <textarea placeholder="Translated text will appear here..." value={translatedText} readOnly />
 
@@ -255,13 +212,11 @@ const swapLanguages = () => {
           </button>
         </div>
         <button className="swap-button" onClick={swapLanguages}>
-            🔄 Swap Languages
-        </button>
-
-      </div>
+        🔄 Swap Languages
+      </button>
+      </div>     
     </div>
   );
 };
 
 export default TranslationPage;
-
