@@ -87,8 +87,10 @@ const TranslationPage: React.FC = () => {
   };
 
   // ✅ Function to translate text using API
-  const translateText = async (text: string): Promise<void> => {
-    if (!outputLang) {
+  const translateText = async (text: string, targetLang?: string): Promise<void> => {
+    const newOutputLang = targetLang || outputLang;
+    
+    if (!newOutputLang) {
       setOutputLangError("Please select a translation language.");
       return;
     }
@@ -98,7 +100,7 @@ const TranslationPage: React.FC = () => {
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, inputLang, outputLang }),
+        body: JSON.stringify({ text, inputLang, outputLang: newOutputLang }),
       });
 
       if (!response.ok) {
@@ -153,6 +155,25 @@ const TranslationPage: React.FC = () => {
     setIsSpeaking(false);
   };
 
+  // ✅ Function to update translation when the output language changes
+  const handleOutputLangChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newOutputLang = e.target.value;
+
+    if (newOutputLang === inputLang) {
+      setOutputLangError("Input and output languages cannot be the same.");
+      return;
+    }
+
+    setOutputLangError("");
+    setOutputLang(newOutputLang);
+
+    // ✅ Immediately update translation if text exists
+    if (inputText.trim()) {
+      setTranslatedText(""); // Clear previous translation before updating
+      await translateText(inputText, newOutputLang);
+    }
+  };
+
   return (
     <div className="container">
       <h1>Healthcare Translation Web App</h1>
@@ -180,7 +201,6 @@ const TranslationPage: React.FC = () => {
             value={inputText} 
             onChange={(e) => setInputText(e.target.value)}
             disabled={!inputLang || !outputLang} // ✅ Disable if no language selected
-            className={!inputLang || !outputLang ? "disabled-textarea" : ""}
           />
 
           <button className={`circle-button ${isListening ? "listening" : "speak"}`} onClick={toggleListening}>
@@ -191,7 +211,7 @@ const TranslationPage: React.FC = () => {
         {/* Right Column - Output */}
         <div className="column">
           <h2>Translated Language <span className="required">*</span></h2>
-          <select value={outputLang} onChange={(e) => setOutputLang(e.target.value)} className="select-box">
+          <select value={outputLang} onChange={handleOutputLangChange} className="select-box">
             <option value="">Select Language</option>
             <option value="en">English</option>
             <option value="zh-CN">Chinese</option>
@@ -214,7 +234,7 @@ const TranslationPage: React.FC = () => {
         <button className="swap-button" onClick={swapLanguages}>
         🔄 Swap Languages
       </button>
-      </div>     
+      </div>
     </div>
   );
 };
