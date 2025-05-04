@@ -2,7 +2,7 @@
 import "../NaoTranslate/global.css"; 
 import { useState } from "react";
 
-// ✅ Define `SpeechRecognition` correctly
+
 declare global {
   interface Window {
     SpeechRecognition: typeof SpeechRecognition;
@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-// ✅ Define API response type
+
 interface TranslationResponse {
   translation: string;
   error?: string;
@@ -199,9 +199,15 @@ const TranslationPage: React.FC = () => {
           <textarea 
             placeholder="Type or speak here..." 
             value={inputText} 
-            onChange={(e) => setInputText(e.target.value)}
-            disabled={!inputLang || !outputLang} // ✅ Disable if no language selected
+            onChange={(e) => {
+              const text = e.target.value;
+              setInputText(text);
+              if (inputLang && outputLang) {
+                translateText(text);
+              }
+            }}
           />
+            
 
           <button className={`circle-button ${isListening ? "listening" : "speak"}`} onClick={toggleListening}>
             {isListening ? "⏹ Stop" : "🎤 Start"}
